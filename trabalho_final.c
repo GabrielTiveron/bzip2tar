@@ -3,10 +3,12 @@
 #include<ctype.h>
 #include<dirent.h>
 #include<string.h>
+#include<bzlib.h>
 
 #define MAX_PATH 1024
 
 void abrir_diretorio(char*);
+void compactar_arquivos(char*);
 
 typedef struct info{
   int infd;
@@ -35,7 +37,15 @@ void abrir_diretorio(char*dir_name){
     }
     else{
       printf("File - %s/%s\n", dir_name, entrada->d_name);
+      char fullpath[MAX_PATH];
+      sprintf(fullpath, "bzip2 %s/%s", dir_name, entrada->d_name);
+      compactar_arquivos(fullpath);
     }
   }
   closedir(dir);
+}
+
+void compactar_arquivos(char *file_name){
+  FILE * f = popen(file_name, "r");
+  pclose(f);  
 }
