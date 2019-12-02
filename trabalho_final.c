@@ -4,6 +4,7 @@
 #include<dirent.h>
 #include<string.h>
 #include<bzlib.h>
+#include<sys/sysinfo.h>
 
 #define MAX_PATH 1024
 
@@ -17,6 +18,8 @@ typedef struct info{
 }info;
 
 int main(int argc, char**argv){
+  int core;
+  core = get_nprocs_conf(); //Numero de processadores
   abrir_diretorio(argv[1]);
 
 
