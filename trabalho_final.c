@@ -20,14 +20,9 @@ typedef struct info{
 int main(int argc, char**argv){
   int core;
   core = get_nprocs_conf(); //Numero de processadores
-  char bz2append[5] = ".bz2";
-  char oldName[MAX_PATH];
-  strcpy(oldName, argv[1]);
-  strncat(argv[1], bz2append, 4);
-  rename(oldName, argv[1]);
   abrir_diretorio(argv[1]);
   char fullpath[MAX_PATH];
-  sprintf(fullpath, "tar -cf %s.tar %s", argv[1], argv[1]);
+  sprintf(fullpath, "tar -cf %s %s", argv[2], argv[1]);
   compactar_arquivos(fullpath);
   return 0;
 }
