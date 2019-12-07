@@ -44,11 +44,12 @@ void abrir_diretorio(char* dir_origin, char *dir_dest){
       char *fdest = malloc(10000 * sizeof(char));
       sprintf(forigin, "%s/%s", dir_origin, entrada->d_name);
       sprintf(fdest, "%s/%s", dir_dest, entrada->d_name);
-      FILE *fp = fopen(forigin, "r");
-      FILE *f = fopen(fdest, "w");
-      char c;
-      while((c = fgetc(fp)) != EOF){
-        fputc(c, f);
+      FILE *fp = fopen(forigin, "rb");
+      FILE *f = fopen(fdest, "wb");
+      char buffer[BUFSIZ];
+      size_t buff;
+      while((buff = fread(buffer, 1, BUFSIZ, fp)) != 0){
+        fwrite(buffer, 1, buff, f);
       }
       fclose(f);
       fclose(fp);
