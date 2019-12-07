@@ -33,17 +33,20 @@ void abrir_diretorio(char* dir_origin, char *dir_dest){
   DIR *dir = opendir(dir_origin);
   struct dirent *entrada;
   while((entrada = readdir(dir)) != NULL){
-    if(entrada->d_type == DT_DIR){
+    if(entrada->d_type != DT_REG){
       if(strcmp(entrada->d_name, ".") == 0 || strcmp(entrada->d_name, "..") == 0){
         continue;
       }
       char path[MAX_PATH];
+      char dir_aux[MAX_PATH];
       snprintf(path, sizeof(path), "%s/%s", dir_origin, entrada->d_name);
-      abrir_diretorio(path, dir_dest);
+      snprintf(dir_aux, sizeof(dir_aux), "%s/%s", dir_dest, entrada->d_name);
+      mkdir(dir_aux, 0777);
+      abrir_diretorio(path, dir_aux);
     }
     else{
-      char *forigin = malloc(10000 * sizeof(char));
-      char *fdest = malloc(10000 * sizeof(char));
+      char *forigin = malloc(MAX_PATH * sizeof(char));
+      char *fdest = malloc(MAX_PATH * sizeof(char));
       sprintf(forigin, "%s/%s", dir_origin, entrada->d_name);
       sprintf(fdest, "%s/%s", dir_dest, entrada->d_name);
       FILE *fp = fopen(forigin, "rb");
