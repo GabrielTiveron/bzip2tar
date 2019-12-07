@@ -17,17 +17,19 @@ void compactar_arquivos(char *);
 void delete_dir(char *);
 
 int main(int argc, char**argv){
-  abrir_diretorio(argv[1], argv[2]);
+  char *dir_dest = malloc(MAX_PATH * sizeof(char));
+  strcpy(dir_dest, argv[2]);
+  dir_dest[strlen(dir_dest)-4] = '\0';
+  mkdir(dir_dest, 0777);
+  abrir_diretorio(argv[1], dir_dest);
   char fullpath[MAX_PATH];
-  sprintf(fullpath, "tar cf %s.bz2.tar %s", argv[1], argv[2]);
+  sprintf(fullpath, "tar cf %s %s", argv[2], dir_dest);
   compactar_arquivos(fullpath);
-  delete_dir(argv[2]);
+  delete_dir(dir_dest);
   return 0;
 }
 
 void abrir_diretorio(char* dir_origin, char *dir_dest){
-  dir_dest[strlen(dir_dest)-4] = '\0';
-  mkdir(dir_dest, 0777);
   DIR *dir = opendir(dir_origin);
   struct dirent *entrada;
   while((entrada = readdir(dir)) != NULL){
@@ -62,7 +64,7 @@ void abrir_diretorio(char* dir_origin, char *dir_dest){
 }
 
 void compactar_arquivos(char *file_name){
-  FILE *f = popen(file_name, "r");
+  FILE *f = popen(file_name, "w");
   pclose(f);
 }
 
