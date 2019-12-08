@@ -1,6 +1,7 @@
 #define _XOPEN_SOURCE 500
 #define _GNU_SOURCE
 #include <stdio.h>
+#include <signal.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <dirent.h>
@@ -12,11 +13,17 @@
 
 #define MAX_PATH 1024
 
+int count_child;
+pid_t filho;
+
 void abrir_diretorio(char *, char *);
 void compactar_arquivos(char *);
 void delete_dir(char *);
+void copy_file(char*,char*);
+void cnt_child();
 
 int main(int argc, char**argv){
+  count_child = 0;
   char *dir_dest = malloc(MAX_PATH * sizeof(char));
   strcpy(dir_dest, argv[2]);
   dir_dest[strlen(dir_dest)-4] = '\0';
@@ -49,21 +56,40 @@ void abrir_diretorio(char* dir_origin, char *dir_dest){
       char *fdest = malloc(MAX_PATH * sizeof(char));
       sprintf(forigin, "%s/%s", dir_origin, entrada->d_name);
       sprintf(fdest, "%s/%s", dir_dest, entrada->d_name);
-      FILE *fp = fopen(forigin, "rb");
-      FILE *f = fopen(fdest, "wb");
-      char buffer[BUFSIZ];
-      size_t buff;
-      while((buff = fread(buffer, 1, BUFSIZ, fp)) != 0){
-        fwrite(buffer, 1, buff, f);
-      }
-      fclose(f);
-      fclose(fp);
+      copy_file(forigin, fdest);
       char fullpath[MAX_PATH];
       sprintf(fullpath, "bzip2 %s", fdest);
-      compactar_arquivos(fullpath);
+      if(count_child < 4){
+        signal(SIGINT, cnt_child);
+        if((filho = fork()) == 0){
+          compactar_arquivos(fullpath);
+          kill(getppid(), SIGINT);
+          exit(1);
+        }
+        else{count_child++;}
+      }else{
+        compactar_arquivos(fullpath);
+      }
     }
   }
   closedir(dir);
+}
+
+void cnt_child(){
+  count_child--;
+}
+
+void copy_file(char*orig, char*dest){
+  FILE *fp = fopen(orig, "rb");
+  FILE *f = fopen(dest, "wb");
+  char buffer[BUFSIZ];
+  size_t buff;
+  while((buff = fread(buffer, 1, BUFSIZ, fp)) != 0){
+    fwrite(buffer, 1, buff, f);
+  }
+  fclose(f);
+  fclose(fp);
+
 }
 
 void compactar_arquivos(char *file_name){
